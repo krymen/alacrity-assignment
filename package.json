@@ -1,0 +1,12 @@
+{
+  "name": "alacrity-assignment",
+  "version": "1.0.0",
+  "description": "Alacrity Platform Engineering Task",
+  "main": "index.js",
+  "repository": "git@github.com:krymen/alacrity-assignment.git",
+  "author": "Krzysztof Menżyk <krzysztof@menzyk.net>",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^3.7.2"
+  }
+}
