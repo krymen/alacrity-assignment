@@ -2,12 +2,18 @@
   "name": "alacrity-assignment",
   "version": "1.0.0",
   "description": "Alacrity Platform Engineering Task",
-  "main": "index.js",
+  "main": "dist/server.js",
   "repository": "git@github.com:krymen/alacrity-assignment.git",
   "author": "Krzysztof Menżyk <krzysztof@menzyk.net>",
   "license": "MIT",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "start:dev": "tsc-watch --onSuccess \"npm start\""
+  },
   "devDependencies": {
     "@types/express": "^4.17.2",
+    "tsc-watch": "^4.0.0",
     "typescript": "^3.7.2"
   },
   "dependencies": {
