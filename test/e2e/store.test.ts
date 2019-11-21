@@ -30,6 +30,22 @@ describe('Encrypted key-value store API', () => {
     expect(response.body).toEqual([{ id: 'key2', value: data }]);
   });
 
+  it('retrieves no value if invalid decryption key given', async () => {
+    const data = { a: 1, b: 'string' };
+
+    await request(app)
+      .put('/key2')
+      .send({
+        encryption_key: 'abc-123',
+        value: data
+      });
+
+    const response = await request(app).get('/key2?decryption_key=invalid');
+
+    expect(response.status).toEqual(HttpStatus.OK);
+    expect(response.body).toEqual([]);
+  });
+
   it('returns bad request if encryption key is not a string when storing value', async () => {
     const response = await request(app)
       .put('/my-sample-key')
