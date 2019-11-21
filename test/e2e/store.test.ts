@@ -16,15 +16,16 @@ describe('Encrypted key-value store API', () => {
 
   it('retrieves value', async () => {
     const data = { a: 1, b: 'string' };
+    const encryptionKey = 'abc-123';
 
     await request(app)
       .put('/key2')
       .send({
-        encryption_key: 'abc-123',
+        encryption_key: encryptionKey,
         value: data
       });
 
-    const response = await request(app).get('/key2?decryption_key=abc-123');
+    const response = await request(app).get(`/key2?decryption_key=${encryptionKey}`);
 
     expect(response.status).toEqual(HttpStatus.OK);
     expect(response.body).toEqual([{ id: 'key2', value: data }]);
@@ -44,6 +45,34 @@ describe('Encrypted key-value store API', () => {
 
     expect(response.status).toEqual(HttpStatus.OK);
     expect(response.body).toEqual([]);
+  });
+
+  it('retrieves many values if wildcard query given', async () => {
+    const data1 = { a: 1, b: 'string1' };
+    const data2 = { a: 2, b: 'string2' };
+    const encryptionKey = 'abc-123';
+
+    await request(app)
+      .put('/key2')
+      .send({
+        encryption_key: encryptionKey,
+        value: data1
+      });
+
+    await request(app)
+      .put('/key3')
+      .send({
+        encryption_key: encryptionKey,
+        value: data2
+      });
+
+    const response = await request(app).get(`/key*?decryption_key=${encryptionKey}`);
+
+    expect(response.status).toEqual(HttpStatus.OK);
+    expect(response.body).toEqual([
+      { id: 'key2', value: data1 },
+      { id: 'key3', value: data2 }
+    ]);
   });
 
   it('returns bad request if encryption key is not a string when storing value', async () => {

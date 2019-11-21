@@ -26,16 +26,37 @@ describe('InMemoryValueRepository', () => {
     repository = new InMemoryValueRepository();
   });
 
-  it('saves value', async () => {
+  it('saves a value', async () => {
     await repository.save(value1);
 
     await expect(repository.all()).resolves.toEqual([value1]);
   });
 
-  it('finds value with exact id', async () => {
+  it('finds a value with exact id', async () => {
     await repository.save(value1);
     await repository.save(value2);
 
     await expect(repository.find(value1.id)).resolves.toEqual([value1]);
+  });
+
+  it('finds values with wildcard id', async () => {
+    await repository.save(value1);
+    await repository.save(value2);
+    await repository.save(value3);
+
+    await expect(repository.find('some-id*')).resolves.toEqual([value1, value2]);
+  });
+
+  it('finds a value with asterisk in id', async () => {
+    const id = 'id-with-*';
+    const valueWithAsterisk = {
+      id,
+      encrypted: 'asd1231asf',
+      initializationVector: 'abc'
+    };
+
+    await repository.save(valueWithAsterisk);
+
+    await expect(repository.find('id-with-*')).resolves.toEqual([valueWithAsterisk]);
   });
 });
