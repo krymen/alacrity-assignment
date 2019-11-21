@@ -8,34 +8,50 @@ describe('Encrypted key-value store API', () => {
       .put('/my-sample-key')
       .send({
         encryption_key: 'abc-123',
-        value: JSON.stringify({ a: 1, b: 'string' })
+        value: { a: 1, b: 'string' }
       });
 
     expect(response.status).toEqual(HttpStatus.NO_CONTENT);
   });
 
-  it('returns bad request if encryption key is not a string', async () => {
+  it('retrieves value', async () => {
+    const data = { a: 1, b: 'string' };
+
+    await request(app)
+      .put('/key2')
+      .send({
+        encryption_key: 'abc-123',
+        value: data
+      });
+
+    const response = await request(app).get('/key2?decryption_key=abc-123');
+
+    expect(response.status).toEqual(HttpStatus.OK);
+    expect(response.body).toEqual([{ id: 'key2', value: data }]);
+  });
+
+  it('returns bad request if encryption key is not a string when storing value', async () => {
     const response = await request(app)
       .put('/my-sample-key')
       .send({
         encryption_key: 1,
-        value: JSON.stringify({ a: 1, b: 'string' })
+        value: { a: 1, b: 'string' }
       });
 
     expect(response.status).toEqual(HttpStatus.BAD_REQUEST);
   });
 
-  it('returns bad request if no encryption key provided', async () => {
+  it('returns bad request if no encryption key provided when storing value', async () => {
     const response = await request(app)
       .put('/my-sample-key')
       .send({
-        value: JSON.stringify({ a: 1, b: 'string' })
+        value: { a: 1, b: 'string' }
       });
 
     expect(response.status).toEqual(HttpStatus.BAD_REQUEST);
   });
 
-  it('returns bad request if value is not of JSON type', async () => {
+  it('returns bad request if value is not of JSON type when storing value', async () => {
     const response = await request(app)
       .put('/my-sample-key')
       .send({
@@ -46,7 +62,7 @@ describe('Encrypted key-value store API', () => {
     expect(response.status).toEqual(HttpStatus.BAD_REQUEST);
   });
 
-  it('returns bad request if no value provided', async () => {
+  it('returns bad request if no value provided when storing value', async () => {
     const response = await request(app)
       .put('/my-sample-key')
       .send({

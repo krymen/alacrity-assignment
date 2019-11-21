@@ -1,4 +1,4 @@
-import { Value, ValueId, ValueRepository } from '../../model/Value';
+import { Value, ValueId, ValueRepository, WildcardId } from '../../model/Value';
 
 export class InMemoryValueRepository implements ValueRepository {
   private items: Map<ValueId, Value>;
@@ -11,6 +11,10 @@ export class InMemoryValueRepository implements ValueRepository {
     this.items.set(item.id, item);
 
     return item;
+  }
+
+  public async find(id: ValueId | WildcardId): Promise<Value[]> {
+    return (await this.all()).filter(value => value.id === id);
   }
 
   public async all(): Promise<Value[]> {

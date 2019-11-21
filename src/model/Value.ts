@@ -1,6 +1,7 @@
 import crypto from 'crypto';
 
 export type ValueId = string;
+export type WildcardId = string;
 export interface Value {
   id: ValueId;
   encrypted: string;
@@ -9,21 +10,26 @@ export interface Value {
 
 export interface ValueRepository {
   save(value: Value): Promise<Value>;
+  find(id: ValueId | WildcardId): Promise<Value[]>;
 }
 
-export type Store = (id: string, rawValue: object, encryptionKey: string) => Value;
+export type Store = (id: string, data: object, encryptionKey: string) => Value;
+export type RawData = (value: Value, encryptionKey: string) => object;
 
 const IV_LENGTH = 16;
 
-export const store: Store = (id, rawValue, encryptionKey) => {
+export const store: Store = (id, data, encryptionKey) => {
   const iv = crypto.randomBytes(IV_LENGTH);
 
   return {
     id,
-    encrypted: encrypt(rawValue, encryptionKeyHash(encryptionKey), iv),
+    encrypted: encrypt(data, encryptionKeyHash(encryptionKey), iv),
     initializationVector: iv.toString('hex')
   };
 };
+
+export const rawData: RawData = (value, decryptionKey) =>
+  decrypt(value.encrypted, encryptionKeyHash(decryptionKey), Buffer.from(value.initializationVector, 'hex'));
 
 const encryptionKeyHash = (encryptionKey: string): Buffer =>
   Buffer.from(
@@ -34,9 +40,17 @@ const encryptionKeyHash = (encryptionKey: string): Buffer =>
       .slice(0, 32)
   );
 
-const encrypt = (rawValue: object, encryptionKey: Buffer, iv: Buffer) => {
+const encrypt = (data: object, encryptionKey: Buffer, iv: Buffer): string => {
   const cipher = crypto.createCipheriv('aes-256-cbc', encryptionKey, iv);
-  const encrypted = cipher.update(JSON.stringify(rawValue));
+  const encrypted = cipher.update(JSON.stringify(data));
 
   return Buffer.concat([encrypted, cipher.final()]).toString('hex');
+};
+
+const decrypt = (encrypted: string, decryptionKey: Buffer, iv: Buffer): object => {
+  const encryptedText = Buffer.from(encrypted, 'hex');
+  const decipher = crypto.createDecipheriv('aes-256-cbc', decryptionKey, iv);
+  const decrypted = decipher.update(encryptedText);
+
+  return JSON.parse(Buffer.concat([decrypted, decipher.final()]).toString());
 };

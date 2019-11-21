@@ -1,4 +1,4 @@
-import { store } from '../../../src/model/Value';
+import { rawData, store } from '../../../src/model/Value';
 
 describe('Value', () => {
   it('stores encrypted value', () => {
@@ -9,5 +9,12 @@ describe('Value', () => {
       encrypted: expect.any(String),
       initializationVector: expect.any(String)
     });
+  });
+
+  it('gets raw value of encrypted value', () => {
+    const data = { a: 'a', b: 'b', c: 1234 };
+    const value = store('my-sample-key', data, 'abc-123');
+
+    expect(rawData(value, 'abc-123')).toEqual(data);
   });
 });
