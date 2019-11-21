@@ -11,10 +11,17 @@ describe('Value', () => {
     });
   });
 
-  it('gets raw value of encrypted value', () => {
+  it('gets raw data of encrypted value', () => {
     const data = { a: 'a', b: 'b', c: 1234 };
     const value = store('my-sample-key', data, 'abc-123');
 
     expect(rawData(value, 'abc-123')).toEqual(data);
+  });
+
+  it('gets undefined if decryption key is invalid', () => {
+    const data = { a: 'a', b: 'b', c: 1234 };
+    const value = store('my-sample-key', data, 'abc-123');
+
+    expect(rawData(value, 'invalid')).toBeUndefined();
   });
 });

@@ -3,13 +3,15 @@ import { check, validationResult } from 'express-validator';
 import HttpStatus from 'http-status-codes';
 import { retrieveValues } from './application/retrieveValues';
 import { storeValue } from './application/storeValue';
+import { createLogger } from './infrastructure/logger';
 import { InMemoryValueRepository } from './infrastructure/repository/InMemoryValueRepository';
 
 const app = express();
 
+const logger = createLogger(app.get('env') === 'development');
 const valueRepository = new InMemoryValueRepository();
 const storeValueUseCase = storeValue(valueRepository);
-const retrieveValuesUseCase = retrieveValues(valueRepository);
+const retrieveValuesUseCase = retrieveValues(valueRepository, logger);
 
 app.set('port', process.env.PORT || 3000);
 app.use(express.json());

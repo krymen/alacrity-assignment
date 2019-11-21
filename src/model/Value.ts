@@ -14,7 +14,7 @@ export interface ValueRepository {
 }
 
 export type Store = (id: string, data: object, encryptionKey: string) => Value;
-export type RawData = (value: Value, encryptionKey: string) => object;
+export type RawData = (value: Value, encryptionKey: string) => object | undefined;
 
 const IV_LENGTH = 16;
 
@@ -47,10 +47,14 @@ const encrypt = (data: object, encryptionKey: Buffer, iv: Buffer): string => {
   return Buffer.concat([encrypted, cipher.final()]).toString('hex');
 };
 
-const decrypt = (encrypted: string, decryptionKey: Buffer, iv: Buffer): object => {
+const decrypt = (encrypted: string, decryptionKey: Buffer, iv: Buffer): object | undefined => {
   const encryptedText = Buffer.from(encrypted, 'hex');
   const decipher = crypto.createDecipheriv('aes-256-cbc', decryptionKey, iv);
   const decrypted = decipher.update(encryptedText);
 
-  return JSON.parse(Buffer.concat([decrypted, decipher.final()]).toString());
+  try {
+    return JSON.parse(Buffer.concat([decrypted, decipher.final()]).toString());
+  } catch (e) {
+    return;
+  }
 };
